@@ -5,7 +5,6 @@ from OpenGL.GLU import *
 import dicom
 import numpy as np
 import scipy.ndimage
-import nifti
 from sys import *
 
 ESCAPE = 27
@@ -92,9 +91,7 @@ Small change with python NeHe mipmapping : mipmap can be called from parameters
 """
 def LoadGLTextures(fname):
     # Load Texture
-    print "Avant le loading"
     image1 = loadVolume(fname)
-    print "APres le loading"
     # Create Textures
     texture = glGenTextures(1)
     
@@ -104,7 +101,6 @@ def LoadGLTextures(fname):
     glTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
     glTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
     glTexImage3D(GL_TEXTURE_3D,0,GL_INTENSITY,image1.sizeX,image1.sizeY,image1.sizeZ,0, GL_LUMINANCE,GL_FLOAT,image1.data)
-    print "Fin du loading de textures"
     return texture
 
 """
@@ -155,7 +151,7 @@ class Canvas:
         #My cube coordinates are -1.,1,-1,1,-1,1. I define the projection
         #with 5 in order to be able to see the cube and its possible rotations
         #You can change it if you want. aspect to keep the window ratio
-        glOrtho(-self.zoom,self.zoom,-self.zoom*aspect,self.zoom*aspect,-100.,100.)
+        glOrtho(-self.zoom,self.zoom,-self.zoom*aspect,self.zoom*aspect,-10,10)
         glMatrixMode(GL_MODELVIEW)
     
     def initGL(self,Width,Height):
@@ -182,8 +178,8 @@ class Canvas:
         #Defines shading (probably not very important here)
         glShadeModel(GL_SMOOTH)
 	
-	    #Size the window (often done automatically, but one time more does not kill
-	    #anyone)
+	    #Size the window (often done automatically, but one time more does not 
+	    #kill anyone)
         self.ReSizeGLScene(Width, Height)
                    
     def DrawGLScene(self):
@@ -304,7 +300,6 @@ class GLWindow:
         
     def keyPressed(self,key,x,y):
         key = ord(key)
-        print "NOT SPECIAL KEY : " + str(key)
         if key == ESCAPE:
             glutDestroyWindow(self.window)
             sys.exit()
@@ -329,7 +324,6 @@ class GLWindow:
             self.canvas.decreasethickness()
             
     def specialkeypressed(self,key,x,y):
-        print "SPECIAL key : " + str(key)
         if key == LEFTXY:
             self.canvas.decreasexyrotation()
         elif key == RIGHXY:
@@ -344,7 +338,6 @@ class GLWindow:
             self.canvas.increasexzrotation()
             
     def mouseFunc(self,key,state,x,y):
-        #print "Mouse : " + str(key)
         if key==UPMOUS:
             self.canvas.increasezoom()
         elif key==DOMOUS:
@@ -353,8 +346,11 @@ class GLWindow:
     def run(self):
         glutMainLoop()
 
-if __name__=="__main__":	        
-    cv = Canvas(argv[1])
-    win = GLWindow(640,480,cv)
-    cv.initGL(640,480)
-    win.run()
+if __name__=="__main__":
+    if(len(argv)==2):     
+        cv = Canvas(argv[1])
+        win = GLWindow(640,480,cv)
+        cv.initGL(640,480)
+        win.run()
+    else:
+        print "You did not use dicomviewer.py correctly. Please read the readme"
