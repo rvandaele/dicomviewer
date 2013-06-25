@@ -12,7 +12,7 @@ ESCAPE = 27
 E_CHAR = 101
 FILTER = 102
 LIGHTN = 108
-DEPTHT = 100
+DEPTHT = 201
 BLENDT = 98
 LEFTXY = 100
 RIGHXY = 102
@@ -20,6 +20,10 @@ UPARYZ = 101
 DOARYZ = 103
 LEARXZ = 106
 RIARXZ = 107
+Q_CHAR = 113
+D_CHAR = 100
+Z_CHAR = 122
+S_CHAR = 115
 
 """
 An image is defined by its two dimensional data, and the size of these dimensions
@@ -123,6 +127,8 @@ class Canvas:
         self.xyrotation = 0
         self.yzrotation = 0
         self.xzrotation = 0
+        self.xtranslation = 0
+        self.ytranslation = 0
         
     """
         Function to be called when the canvas is resized.
@@ -205,7 +211,7 @@ class Canvas:
         #My object is defined by the coordinates [-1,1;-1,1;-1,1]
         #Zero is the center, and I am in orhographic projection, so no in depth
         #translation needed
-        glTranslatef(0.0,0.0,0.0)
+        glTranslatef(self.xtranslation,self.ytranslation,0.0)
         
         #Rotate the volume
         glRotatef(self.yzrotation,1.0,0.0,0.0)
@@ -219,7 +225,7 @@ class Canvas:
         
         glBegin(GL_QUADS)
         
-        for d in np.arange(-1.,1.,1./256.):
+        for d in np.arange(-1.,1.,1./600.):
             td = (d+1.)/2.
             glNormal3f(d,0.0,0.0)
             
@@ -234,8 +240,6 @@ class Canvas:
             
             glTexCoord3f(td,1.,0.)
             glVertex3f(1.,-1.,d)
-
-        
         glEnd()
 
     def changelight(self):
@@ -275,7 +279,19 @@ class Canvas:
         self.xzrotation = self.xzrotation+1
         
     def decreasexzrotation(self):
-        self.xzrotation = self.xzrotation-1	        
+        self.xzrotation = self.xzrotation-1	    
+        
+    def increasextranslation(self):
+        self.xtranslation = self.xtranslation+0.05
+        
+    def decreasextranslation(self):
+        self.xtranslation = self.xtranslation-0.05
+        
+    def increaseytranslation(self):
+        self.ytranslation = self.ytranslation+0.05
+        
+    def decreaseytranslation(self):
+        self.ytranslation = self.ytranslation-0.05    
 
 class GLWindow:
     def __init__(self,Width,Height,canvas):
@@ -321,6 +337,14 @@ class GLWindow:
             self.canvas.changeblending()
         elif key == DEPTHT:
             self.canvas.changedepth()
+        elif key == D_CHAR:
+            self.canvas.increasextranslation()
+        elif key == Q_CHAR:
+            self.canvas.decreasextranslation()
+        elif key == Z_CHAR:
+            self.canvas.increaseytranslation()
+        elif key == S_CHAR:
+            self.canvas.decreaseytranslation()
     
     def specialkeypressed(self,key,x,y):
         if key == LEFTXY:
