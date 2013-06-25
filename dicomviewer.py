@@ -24,6 +24,8 @@ Q_CHAR = 113
 D_CHAR = 100
 Z_CHAR = 122
 S_CHAR = 115
+UPMOUS = 3
+DOMOUS = 4
 
 """
 An image is defined by its two dimensional data, and the size of these dimensions
@@ -129,6 +131,9 @@ class Canvas:
         self.xzrotation = 0
         self.xtranslation = 0
         self.ytranslation = 0
+        self.zoom = 4.
+        self.width = 0
+        self.height = 0
         
     """
         Function to be called when the canvas is resized.
@@ -136,6 +141,8 @@ class Canvas:
     """
     def ReSizeGLScene(self,Width, Height):
         
+        self.width = Width
+        self.height = Height
         # 0 in width would mess up my further calculations, and you couldn't
         # see anything
         if Width == 0:
@@ -151,7 +158,7 @@ class Canvas:
         #My cube coordinates are -1.,1,-1,1,-1,1. I define the projection
         #with 5 in order to be able to see the cube and its possible rotations
         #You can change it if you want. aspect to keep the window ratio
-        glOrtho(-4.,4.,-4.*aspect,4.*aspect,-100.,100.)
+        glOrtho(-self.zoom,self.zoom,-self.zoom*aspect,self.zoom*aspect,-100.,100.)
         glMatrixMode(GL_MODELVIEW)
     
     def initGL(self,Width,Height):
@@ -291,8 +298,16 @@ class Canvas:
         self.ytranslation = self.ytranslation+0.05
         
     def decreaseytranslation(self):
-        self.ytranslation = self.ytranslation-0.05    
-
+        self.ytranslation = self.ytranslation-0.05
+    
+    def increasezoom(self):
+        self.zoom = self.zoom - 0.125
+        self.ReSizeGLScene(self.width,self.height)
+        
+    def decreasezoom(self):
+        self.zoom = self.zoom + 0.125
+        self.ReSizeGLScene(self.width,self.height)
+        
 class GLWindow:
     def __init__(self,Width,Height,canvas):
         glutInit("")
@@ -307,6 +322,7 @@ class GLWindow:
         glutReshapeFunc(self.ReSizeGLScene)
         glutKeyboardFunc(self.keyPressed)
         glutSpecialFunc(self.specialkeypressed)
+        glutMouseFunc(self.mouseFunc)
         self.bool = 0
         #glutFullScreen()
     
@@ -359,6 +375,13 @@ class GLWindow:
             self.canvas.decreasexzrotation()
         elif key == RIARXZ:
             self.canvas.increasexzrotation()
+            
+    def mouseFunc(self,key,state,x,y):
+        #print "Mouse : " + str(key)
+        if key==UPMOUS:
+            self.canvas.increasezoom()
+        elif key==DOMOUS:
+            self.canvas.decreasezoom()
             
     def run(self):
         glutMainLoop()
