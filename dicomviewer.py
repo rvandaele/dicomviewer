@@ -92,7 +92,9 @@ Small change with python NeHe mipmapping : mipmap can be called from parameters
 """
 def LoadGLTextures(fname):
     # Load Texture
+    print "Avant le loading"
     image1 = loadVolume(fname)
+    print "APres le loading"
     # Create Textures
     texture = glGenTextures(1)
     
@@ -102,6 +104,7 @@ def LoadGLTextures(fname):
     glTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
     glTexParameterf( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
     glTexImage3D(GL_TEXTURE_3D,0,GL_INTENSITY,image1.sizeX,image1.sizeY,image1.sizeZ,0, GL_LUMINANCE,GL_FLOAT,image1.data)
+    print "Fin du loading de textures"
     return texture
 
 """
