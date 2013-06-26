@@ -2,10 +2,8 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-import dicom
-import numpy as np
-import scipy.ndimage
 from sys import *
+import numpy as np
 
 ESCAPE = 27
 E_CHAR = 101
@@ -35,45 +33,7 @@ class Volume:
         self.sizeX = 0
         self.sizeY = 0
         self.sizeZ = 0
-        
-def loadVolume(filename):
-    f = open(filename,'r')
-    lines = f.readlines()
-    n = len(lines)
-    
-    fname = lines[0].rstrip()
-    image = dicom.read_file(fname)
-    height = len(image.PixelArray)
-    width = len(image.PixelArray[0])
-    
-    real_max = np.max(image.PixelArray)
-    real_min = np.min(image.PixelArray)
-    
-    taille = np.max([height,width,n])
-    
-    taille = pow(2,np.ceil(np.log2(taille)))
-    if(taille<256):
-        taille=256
-    VOL = np.zeros((taille,taille,taille))
-    
-    for i in range(n):
-        fname = lines[i].rstrip()
-        image = dicom.read_file(fname)
-        tab = image.pixel_array
-        VOL[i-1][0:height][0:width] = tab
-        
-    maximum = np.max(VOL)
-    minimum = np.min(VOL)
-    maxmin = maximum-minimum
-    VOL = (VOL-minimum)/maxmin
-    VOL = scipy.ndimage.zoom(VOL,256./taille)
-    omage = Volume()
-    omage.data = VOL
-    omage.sizeX = 256
-    omage.sizeY = 256
-    omage.sizeZ = 256
-    return omage
-     
+             
 """
 Load the GL texture from the filename: 
 basically, I load it using loadImage, and then create 3 textures with the image
@@ -89,9 +49,9 @@ then link the texture
 
 Small change with python NeHe mipmapping : mipmap can be called from parameters
 """
-def LoadGLTextures(fname):
+def LoadGLTextures(image1):
     # Load Texture
-    image1 = loadVolume(fname)
+    #image1 = loadVolume(fname)
     # Create Textures
     texture = glGenTextures(1)
     
@@ -115,9 +75,9 @@ class Canvas:
         that defines some parameters to use
         So, to be sure, we just initalize the state of the canvas here
     """
-    def __init__(self,t_name):
+    def __init__(self,vol):
         self.textures = None 
-        self.name = t_name
+        self.vol = vol
         self.xyrotation = 0
         self.yzrotation = 0
         self.xzrotation = 0
@@ -157,7 +117,7 @@ class Canvas:
     def initGL(self,Width,Height):
         # Loads the textures and enables 2D texturing (I only draw 2D images on
         # the cube faces)
-        self.textures = LoadGLTextures(self.name)
+        self.textures = LoadGLTextures(self.vol)
         glEnable(GL_TEXTURE_3D)
         
         #Window is set to black
@@ -345,12 +305,3 @@ class GLWindow:
             
     def run(self):
         glutMainLoop()
-
-if __name__=="__main__":
-    if(len(argv)==2):     
-        cv = Canvas(argv[1])
-        win = GLWindow(640,480,cv)
-        cv.initGL(640,480)
-        win.run()
-    else:
-        print "You did not use dicomviewer.py correctly. Please read the readme"
